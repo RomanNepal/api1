@@ -11,7 +11,7 @@ var jsonParser = bodyParser.json()
 
 // create application/x-www-form-urlencoded parser
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
-app.post("/login",jsonParser, uploader.single("image"), auth_controller.login);
-
-app.post("/register",jsonParser, uploader.single("image"), auth_controller.register);
+app.post("/login", uploader.single("image"), auth_controller.login);
+app.post("/register", uploader.single("image"), auth_controller.register);
+app.post("/update", uploader.single('image'), auth_controller.update)
 module.exports = app;

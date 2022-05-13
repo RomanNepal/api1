@@ -10,7 +10,7 @@ table = "merncollection";
 dbName = "mern";
 // Database Name
 
-const dbConnection = (cb) => {
+const dbConnection = () => {
   // MongoClient.connect(url, (err, client) => {
   //       if (err) {
   //         cb({ status: 500, msg: "Error connecting database server" });
@@ -32,12 +32,7 @@ const dbConnection = (cb) => {
   });
 };
 
-const checkUserExistence = (data) => {
-  const db = client.db(dbName);
-  dbConnection().then().catch();
-};
-
-const addUser = (table, data) => {
+const addRecord = (table, data) => {
   return new Promise((resolve, reject) => {
     dbConnection()
       .then((db) => {
@@ -46,47 +41,53 @@ const addUser = (table, data) => {
           .then((ack) => {
             return resolve(ack);
           })
-          .catch((err)=>{
+          .catch((err) => {
             return reject(err);
           });
       })
       .catch((err) => {
-        next({status: 500, msg:"Error connecting db"})
+        console.log(err);
       });
   });
-
-  // dbConnection()
-  //   .then((db) => {
-  //     db.collection(table)
-  //       .insertOne(data)
-  //       .then((data) => {
-  //         console.log("User registered successfully");
-  //       }).catch((err)=>{
-  //         console.log("Error while inserting")
-  //       });
-
-  // .then((data)=>{
-  //     res.json({
-  //       status: 400,
-  //       msg:"Email already registered"
-  //     })
-  // })
-  // .catch();
-
-  // console.log(emailFinded);
-  //   if (emailFinded == data.email) {
-  //     console.log("Error! User already registered");
-  //   } else {
-
-  // db.collection(table)
-  //   .insertOne(data)
-  //   .then(() => {
-  //     console.log("User registered successfully");
-  //   });
-  // })
-  // .catch((err) => {
-  //   console.log(err);
-  // });
 };
 
-module.exports = { dbConnection, addUser };
+const updateRecord = (tablename, myquery, data) => {
+  return new Promise((resolve, reject) => {
+    dbConnection()
+      .then((db) => {
+        db.collection(tablename)
+          .updateMany(myquery, { $set: data })
+          .then((ack) => {
+            return resolve(ack);
+          })
+          .catch((err) => {
+            return reject({ status: 500, msg: err });
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+};
+
+const getRecord = (table, filter) => {
+  return new Promise((resolve, reject) => {
+    dbConnection()
+      .then((db) => {
+        db.collection(table)
+          .find(filter)
+          .toArray()
+          .then((data) => {
+            return resolve(data);
+          })
+          .catch((err) => {
+            return reject(err);
+          });
+      })
+      .catch((err) => {
+        return reject({ status: 500, msg: err });
+      });
+  });
+};
+
+module.exports = { dbConnection, addRecord, updateRecord, getRecord };

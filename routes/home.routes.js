@@ -9,14 +9,14 @@ app.get('/', (req, res)=>{
 });
 app.get('/contactus', (req, res)=>{
     res.json({
-        content: "Home content",
-    msg: "Home content message",
+        content: "Contact Page",
+    msg: "You contacted us",
     })
 });
 app.get('/aboutus', (req, res)=>{
     res.json({
-        content: "Home content",
-    msg: "Home content message",
+        content: "About Us content",
+    msg: "You wanted to know about us",
     })
 });
 module.exports = app;

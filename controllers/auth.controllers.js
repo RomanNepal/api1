@@ -1,6 +1,10 @@
 // const mongodb = require("mongodb");
 // const MongoClient = mongodb.MongoClient;
-const { dbConnection, addUser } = require("../Services/mongodb.services.js");
+const {
+  dbConnection,
+  addRecord,
+  updateRecord,
+} = require("../Services/mongodb.services.js");
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
@@ -149,8 +153,6 @@ class AuthController {
   };
   register = (req, res, next) => {
     let data = req.body;
-    console.log("we are here");
-    console.log(data);
     if (req.file) {
       data.image = req.file.filename;
     }
@@ -168,29 +170,67 @@ class AuthController {
                 msg: "Email already in use",
               });
             } else {
-              addUser("merncollection", data).then((ack)=>{
-                res.json({
-                  result: ack,
-                  status: 200,
-                  msg: "User inserted successfully",
-                });
-              }).catch((err)=>{
-                res.json({
-                  status: 400,
-                  msg:err
+              addRecord("merncollection", data)
+                .then((ack) => {
+                  res.json({
+                    result: ack,
+                    status: 200,
+                    msg: "User inserted successfully",
+                  });
                 })
-              })
+                .catch((err) => {
+                  res.json({
+                    status: 400,
+                    msg: err,
+                  });
+                });
             }
           })
           .catch((err) => {
             res.json({
               status: 400,
-              msg: err
-            })
+              msg: err,
+            });
           });
       })
-      .catch((err)=>{
-        next({status: 500, msg:"Error connecting db"})
+      .catch((err) => {
+        next({ status: 500, msg: "Error connecting db" });
+      });
+  };
+
+  update = (req, res, next) => {
+    let data = req.body;
+    if (req.file) {
+      data.image = req.file.filename;
+    }
+    dbConnection()
+      .then((db) => {
+        updateRecord('merncollection', { email: data.email }, data)
+          .then((ack) => {
+            res.json({
+              result: ack,
+              status: 200,
+              msg: "User updated successfully",
+            });
+          })
+          .catch((err) => {
+            res.json({
+              status: 400,
+              msg: err,
+            });
+          });
+        // db.collection(table)
+        //   .find(data.email)
+        //   .then((users) => {
+        //     if (users.length) {
+        //       updateUser()
+        //     } else {
+        //     }
+        //   })
+        //   .catch(() => {});
+      })
+      .catch((err) => {
+        next({ status: 500, msg: "Error connecting db" });
       });
   };
 }

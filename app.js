@@ -11,6 +11,10 @@ app.use("/assets", express.static(process.cwd() + "/uploads"));
 app.set("view engine", "pug");
 app.set("views", process.cwd() + "/views");
 
+app.use(express.json());
+app.use(express.urlencoded({
+  extended: false
+}))
 // const app = http.createServer((req, res) => {
 //   console.log("Request method " + req.method);
 //   console.log("Req url is " + req.url);
