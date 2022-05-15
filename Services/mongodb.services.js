@@ -78,16 +78,37 @@ const getRecord = (table, filter) => {
           .find(filter)
           .toArray()
           .then((data) => {
-            return resolve(data);
+            if(data){
+              return resolve(data);
+            }
+            else{
+              return reject(err);
+            }
           })
           .catch((err) => {
             return reject(err);
           });
       })
       .catch((err) => {
-        return reject({ status: 500, msg: err });
+        return reject({ status: 500, msg: "Error connecting db" });
       });
   });
 };
 
-module.exports = { dbConnection, addRecord, updateRecord, getRecord };
+const deleteRecord = (table, filter) => {
+  return new Promise((resolve, reject) => {
+    dbConnection()
+      .then((db) => {
+        db.collection(table).deleteMany(filter).then((data)=>{
+          return resolve(data)
+        }).catch((err)=>{
+          return reject(err);
+        })
+      })
+      .catch((err) => {
+        return reject(err);
+      });
+  });
+};
+
+module.exports = { dbConnection, addRecord, updateRecord, getRecord, deleteRecord };

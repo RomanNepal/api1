@@ -4,7 +4,11 @@ const {
   dbConnection,
   addRecord,
   updateRecord,
+  getRecord,
 } = require("../Services/mongodb.services.js");
+const User = require("../models/user.model");
+const bcrypt = require("bcrypt");
+const { response } = require("../routes/home.routes.js");
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
@@ -17,42 +21,68 @@ const dbName = "mern";
 const table = "merncollection";
 
 class AuthController {
-  login = (req, res, next) => {
+  login = async (req, res, next) => {
     let data = req.body;
+    console.log(data);
+    try {
+      console.log()
+      let user = await User.findOne({
+        email: data.email
+      });
+      console.log("user is", user);
+      if (user) {
+        if (bcrypt.compareSync(data.password, user.password)) {
+          res.json({
+            result: result,
+            status: true,
+            msg: "Logged in successfully",
+          });
+        }
+      } else {
+        res.json({
+          result: null,
+          status: false,
+          msg: "User not found",
+        });
+      }
+    } catch (err) {
+      next(err);
+    }
+
     //db query before response
     // this is for promise handling which was giving me error like hell Note: This error was due to .findOne() which is not the way to go. Instead always use .find() only and only
-    dbConnection()
-      .then((db) => {
-        db.collection("merncollection")
-          .find({ email: data.email })
-          .toArray()
-          .then((users) => {
-            if (users.length) {
-              res.json({
-                result: users,
-                status: true,
-                msg: "User logged in successfully",
-              });
-            } else {
-              res.json({
-                result: null,
-                status: false,
-                msg: "User not found",
-              });
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            res.json({
-              result: null,
-              status: false,
-              msg: "User Not found",
-            });
-          });
-      })
-      .catch((err) => {
-        next({ msg: "Error connecting database" });
-      });
+    // dbConnection()
+    //   .then((db) => {
+    //     db.collection("merncollection")
+    //       .find({ email: data.email })
+    //       .toArray()
+    //       .then((users) => {
+    //         if (users.length) {
+    //           res.json({
+    //             result: users,
+    //             status: true,
+    //             msg: "User logged in successfully",
+    //           });
+    //         } else {
+    //           res.json({
+    //             result: null,
+    //             status: false,
+    //             msg: "User not found",
+    //           });
+    //         }
+    //       })
+    //       .catch((err) => {
+    //         console.log(err);
+    //         res.json({
+    //           result: null,
+    //           status: false,
+    //           msg: "User Not found",
+    //         });
+    //       });
+    //   })
+    //   .catch((err) => {
+    //     next({ msg: "Error connecting database" });
+    //   });
 
     //this is using callback
     // dbConnection((err, db)=>{
@@ -151,87 +181,73 @@ class AuthController {
     //   data.image = req.file.filename;
     // }
   };
-  register = (req, res, next) => {
+  register = async (req, res, next) => {
     let data = req.body;
     if (req.file) {
       data.image = req.file.filename;
+    }
+    let user = await User.findOne({
+      email: data.email,
+    });
+    console.log("user is", user);
+    if (user) {
+      next({ status: 400, msg: "Email already in use" });
+    } else {
+      data["password"] = bcrypt.hashSync(data["password"], 10);
+      let user = new User(data);
+      user
+        .save()
+        .then((response) => {
+          res.json({
+            result: response,
+            status: true,
+            msg: "User registered successfully",
+          });
+        })
+        .catch((error) => {
+          next(error);
+        });
     }
     // console.log(req.file);
     // database query before response
-    dbConnection()
-      .then((db) => {
-        db.collection(table)
-          .find({ email: data.email })
-          .toArray()
-          .then((users) => {
-            if (users.length) {
-              res.json({
-                status: 400,
-                msg: "Email already in use",
-              });
-            } else {
-              addRecord("merncollection", data)
-                .then((ack) => {
-                  res.json({
-                    result: ack,
-                    status: 200,
-                    msg: "User inserted successfully",
-                  });
-                })
-                .catch((err) => {
-                  res.json({
-                    status: 400,
-                    msg: err,
-                  });
-                });
-            }
-          })
-          .catch((err) => {
-            res.json({
-              status: 400,
-              msg: err,
-            });
-          });
-      })
-      .catch((err) => {
-        next({ status: 500, msg: "Error connecting db" });
-      });
-  };
-
-  update = (req, res, next) => {
-    let data = req.body;
-    if (req.file) {
-      data.image = req.file.filename;
-    }
-    dbConnection()
-      .then((db) => {
-        updateRecord('merncollection', { email: data.email }, data)
-          .then((ack) => {
-            res.json({
-              result: ack,
-              status: 200,
-              msg: "User updated successfully",
-            });
-          })
-          .catch((err) => {
-            res.json({
-              status: 400,
-              msg: err,
-            });
-          });
-        // db.collection(table)
-        //   .find(data.email)
-        //   .then((users) => {
-        //     if (users.length) {
-        //       updateUser()
-        //     } else {
-        //     }
-        //   })
-        //   .catch(() => {});
-      })
-      .catch((err) => {
-        next({ status: 500, msg: "Error connecting db" });
-      });
+    //   dbConnection()
+    //     .then((db) => {
+    //       db.collection(table)
+    //         .find({ email: data.email })
+    //         .toArray()
+    //         .then((users) => {
+    //           if (users.length) {
+    //             res.json({
+    //               status: 400,
+    //               msg: "Email already in use",
+    //             });
+    //           } else {
+    //             addRecord("merncollection", data)
+    //               .then((ack) => {
+    //                 res.json({
+    //                   result: ack,
+    //                   status: 200,
+    //                   msg: "User inserted successfully",
+    //                 });
+    //               })
+    //               .catch((err) => {
+    //                 res.json({
+    //                   status: 400,
+    //                   msg: err,
+    //                 });
+    //               });
+    //           }
+    //         })
+    //         .catch((err) => {
+    //           res.json({
+    //             status: 400,
+    //             msg: err,
+    //           });
+    //         });
+    //     })
+    //     .catch((err) => {
+    //       next({ status: 500, msg: "Error connecting db" });
+    //     });
   };
 }
 module.exports = AuthController;

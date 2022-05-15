@@ -40,12 +40,6 @@ app.use(express.urlencoded({
 // smtp => 25, 2525, 465, 587
 // ftp/sftp => 21, 22
 // http/https => 80, 443
-app.get("/", (req, res, next) => {
-  //for static files=> res.sendFile(process.cwd()+"/views/index.html");
-  // for dynamic
-  let name = "Roman";
-  res.render("index", { name: name });
-});
 
 app.use(routes);
 
@@ -72,21 +66,11 @@ app.get("/download", (req, res) => {
   res.download("git.jpg");
 });
 
-app.use((req, res) => {
-  res.status(404).json({
-    result: {
-      name: "Roman",
-      email: "nepalroman100@gmail.com",
-    },
-    status: false,
-    msg: "Login failure",
-  });
-});
+
 
 app.use((err, req, res, next) => {
   let status_code = err?.status || 500;
   let msg = err?.msg || "Error";
-  console.log('error here')
   res.status(status_code).json({
     result: null,
     status: false,

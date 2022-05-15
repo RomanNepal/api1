@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const BannerSchemaDef = new mongoose.Schema({
+const BrandSchemaDef = new mongoose.Schema({
 title: {
     type: String
 },
@@ -22,6 +22,6 @@ status:{
     autoIndex: true
 })
 
-const BannerModel = mongoose.model('Banner',BannerSchemaDef);
+const BrandModel = mongoose.model('Brand',BrandSchemaDef);
 
-module.exports = BannerModel;
+module.exports = BrandModel;

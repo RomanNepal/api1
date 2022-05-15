@@ -8,4 +8,4 @@ Mongoose.connect(dbUrl,{autoIndex:true,autoCreate:true},(err)=>{
         console.log("Database connected successfully");
     }
 })
-module.exports = Mongoose; 
+module.exports = Mongoose;

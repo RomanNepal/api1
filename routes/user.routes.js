@@ -1,16 +1,15 @@
 const  bodyparser  = require('body-parser');
 const UserController = require('../controllers/user.controller');
-let usercontroller = new UserController();
+let user_controller = new UserController();
 let router = require('express').Router();
 const express = require('express');
 const uploader = require('../middleware/uploader.middleware');
-const app = express();
 
 
-router.route('/').get(usercontroller.listAll)
+router.route("/").get(user_controller.listAll);
 router.route("/:id")
-.put(uploader.single('image'), usercontroller.update)
-.delete(usercontroller.delete)
-.get(usercontroller.show)
+.put(user_controller.update)
+.delete(user_controller.delete)
+.get(user_controller.show)
 
-module.exports=app;
+module.exports=router;

@@ -13,6 +13,9 @@ const CategorySchemaDef = new mongoose.Schema({
          type:String,
          unique: true
      },
+     summary:{
+        type: String,
+     },
      parent_id:{
          type:mongoose.Types.ObjectId,
          ref: "Category",
@@ -21,6 +24,13 @@ const CategorySchemaDef = new mongoose.Schema({
      image:{
          type: String
      },
+     summary:{
+         type: String,
+     },
+     brand:[{
+        type: mongoose.Types.ObjectId,
+        ref:"Brand"
+     }],
      status:{
          type: String,
          enum: ['active', 'inactive'],

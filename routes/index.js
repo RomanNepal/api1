@@ -7,6 +7,6 @@ const user_routes = require('./user.routes');
 app.use(home_routes);
 app.use(auth_routes);
 app.use("/brand",brand_routes);
-app.use("/user", user_routes);
+app.use("/user",user_routes);
 
 module.exports = app;
