@@ -8,7 +8,7 @@ const {
 } = require("../Services/mongodb.services.js");
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
-const { response } = require("../routes/home.routes.js");
+
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
@@ -24,19 +24,26 @@ class AuthController {
   login = async (req, res, next) => {
     let data = req.body;
     console.log(data);
-    try {
-      console.log()
+    try{
+      console.log(data)
       let user = await User.findOne({
-        email: data.email
+        email: req.body.email
       });
       console.log("user is", user);
       if (user) {
+        
         if (bcrypt.compareSync(data.password, user.password)) {
           res.json({
             result: result,
             status: true,
             msg: "Logged in successfully",
           });
+        }
+        else{
+          res.json({
+            status: false,
+            msg:"Password doesn't match"
+          })
         }
       } else {
         res.json({
@@ -46,7 +53,11 @@ class AuthController {
         });
       }
     } catch (err) {
-      next(err);
+      console.log(err)
+       res.json({
+        status: 500,
+        msg:"Error in login"
+      })
     }
 
     //db query before response

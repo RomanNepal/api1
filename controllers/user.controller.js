@@ -9,7 +9,7 @@ const {
 } = require("../Services/mongodb.services");
 class UserController {
   
-
+  
   update = (req, res, next) => {
     let data = req.body;
     if (req.file) {

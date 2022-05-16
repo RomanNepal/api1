@@ -1,7 +1,7 @@
 // const http = require("http");
 const express = require("express");
 const app = express();
-const port = 3001;
+require('./config/mongo.config');
 const home_routes = require("./routes/home.routes");
 const auth_routes = require("./routes/auth.routes");
 const routes = require("./routes");
@@ -81,11 +81,11 @@ app.use((err, req, res, next) => {
 //error handling middleware
 // app.use((err, req, res, next)=>{})
 
-app.listen(3001, "localhost", (error) => {
+app.listen(3005, "localhost", (error) => {
   if (error) {
     console.log("Server connection Error!!!");
   } else {
-    console.log("Server connection successful on port no. " + port);
+    console.log("Server connection successful on port no. " + 3005);
   }
 });
 module.exports = app;
