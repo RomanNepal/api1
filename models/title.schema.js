@@ -1,7 +1,7 @@
 let slugSchema = {
     slug:{
         type: String,
-        unique: true
+        
     }
 }
 

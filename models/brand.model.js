@@ -1,27 +1,29 @@
-const mongoose = require('mongoose');
-const BrandSchemaDef = new mongoose.Schema({
-title: {
-    type: String
-},
-image:{
-    type: String,
-    required: true
-},
-link:{
-    type: String
-},
-status:{
-    type: String,
-    enum: ["active", "inactive"],
-    default: ["inactive"]
-},
-
-},{
+const mongoose = require("mongoose");
+const BrandSchemaDef = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    image: {
+      type: String,
+    },
+    link: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: ["active"],
+    },
+  },
+  {
     timestamps: true,
     autoCreate: true,
-    autoIndex: true
-})
+    autoIndex: true,
+  }
+);
 
-const BrandModel = mongoose.model('Brand',BrandSchemaDef);
+const Brand = mongoose.model("brand", BrandSchemaDef);
 
-module.exports = BrandModel;
+module.exports = Brand;

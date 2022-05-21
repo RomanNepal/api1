@@ -8,7 +8,8 @@ const {
 } = require("../Services/mongodb.services.js");
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
-
+const jwt = require("jsonwebtoken");
+const CONSTANTS = require("../config/constants");
 // or as an es module:
 // import { MongoClient } from 'mongodb'
 
@@ -24,26 +25,33 @@ class AuthController {
   login = async (req, res, next) => {
     let data = req.body;
     console.log(data);
-    try{
-      console.log(data)
+    try {
+      console.log(data);
       let user = await User.findOne({
-        email: req.body.email
+        email: data.email,
       });
-      console.log("user is", user);
       if (user) {
-        
         if (bcrypt.compareSync(data.password, user.password)) {
+          let result = {
+            token: this.generateToken({
+              id: user._id,
+              name: user.name,
+              email: user.email,
+              role: user.role,
+            }),
+            user: user,
+          };
+
           res.json({
             result: result,
             status: true,
             msg: "Logged in successfully",
           });
-        }
-        else{
+        } else {
           res.json({
             status: false,
-            msg:"Password doesn't match"
-          })
+            msg: "Password doesn't match",
+          });
         }
       } else {
         res.json({
@@ -53,11 +61,34 @@ class AuthController {
         });
       }
     } catch (err) {
-      console.log(err)
-       res.json({
+      // console.log("user is", user);
+      // if (user) {
+
+      //   if (bcrypt.compareSync(data.password, user.password)) {
+      //     res.json({
+      //       result: result,
+      //       status: true,
+      //       msg: "Logged in successfully",
+      //     });
+      //   }
+      //   else{
+      //     res.json({
+      //       status: false,
+      //       msg:"Password doesn't match"
+      //     })
+      //   }
+      // } else {
+      //   res.json({
+      //     result: null,
+      //     status: false,
+      //     msg: "User not found",
+      //   });
+      // }
+      console.log(err);
+      res.json({
         status: 500,
-        msg:"Error in login"
-      })
+        msg: err,
+      });
     }
 
     //db query before response
@@ -197,68 +228,82 @@ class AuthController {
     if (req.file) {
       data.image = req.file.filename;
     }
-    let user = await User.findOne({
-      email: data.email,
-    });
-    console.log("user is", user);
-    if (user) {
-      next({ status: 400, msg: "Email already in use" });
-    } else {
-      data["password"] = bcrypt.hashSync(data["password"], 10);
-      let user = new User(data);
-      user
-        .save()
-        .then((response) => {
-          res.json({
-            result: response,
-            status: true,
-            msg: "User registered successfully",
+
+    try {
+      // let user = await getRecord('users', { email: data.email });
+
+      let user = await User.findOne({
+        email: data.email,
+      });
+      if (user) {
+        next({ status: 400, msg: "Email already taken" });
+      } else {
+        // data['password']
+        data["password"] = bcrypt.hashSync(data["password"], 10);
+
+        let user = new User(data);
+        // addRecord('users', data)
+        user
+          .save()
+          .then((response) => {
+            res.json({
+              result: response,
+              status: true,
+              msg: "User registered successfully",
+            });
+          })
+          .catch((error) => {
+            next(error);
           });
-        })
-        .catch((error) => {
-          next(error);
-        });
+      }
+    } catch (error) {
+      next(error);
     }
-    // console.log(req.file);
-    // database query before response
-    //   dbConnection()
-    //     .then((db) => {
-    //       db.collection(table)
-    //         .find({ email: data.email })
-    //         .toArray()
-    //         .then((users) => {
-    //           if (users.length) {
-    //             res.json({
-    //               status: 400,
-    //               msg: "Email already in use",
-    //             });
-    //           } else {
-    //             addRecord("merncollection", data)
-    //               .then((ack) => {
-    //                 res.json({
-    //                   result: ack,
-    //                   status: 200,
-    //                   msg: "User inserted successfully",
-    //                 });
-    //               })
-    //               .catch((err) => {
-    //                 res.json({
-    //                   status: 400,
-    //                   msg: err,
-    //                 });
-    //               });
-    //           }
-    //         })
-    //         .catch((err) => {
-    //           res.json({
-    //             status: 400,
-    //             msg: err,
-    //           });
-    //         });
-    //     })
-    //     .catch((err) => {
-    //       next({ status: 500, msg: "Error connecting db" });
-    //     });
   };
+  generateToken = (data) => {
+    let token = jwt.sign(data, CONSTANTS.JWT_SECRET);
+    return token;
+  };
+  // console.log(req.file);
+  // database query before response
+  //   dbConnection()
+  //     .then((db) => {
+  //       db.collection(table)
+  //         .find({ email: data.email })
+  //         .toArray()
+  //         .then((users) => {
+  //           if (users.length) {
+  //             res.json({
+  //               status: 400,
+  //               msg: "Email already in use",
+  //             });
+  //           } else {
+  //             addRecord("merncollection", data)
+  //               .then((ack) => {
+  //                 res.json({
+  //                   result: ack,
+  //                   status: 200,
+  //                   msg: "User inserted successfully",
+  //                 });
+  //               })
+  //               .catch((err) => {
+  //                 res.json({
+  //                   status: 400,
+  //                   msg: err,
+  //                 });
+  //               });
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           res.json({
+  //             status: 400,
+  //             msg: err,
+  //           });
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       next({ status: 500, msg: "Error connecting db" });
+  //     });
 }
+
 module.exports = AuthController;

@@ -7,78 +7,82 @@ const {
   updateRecord,
   getRecord,
 } = require("../Services/mongodb.services");
+const User = require("../models/user.model");
 class UserController {
-  
-  
-  update = (req, res, next) => {
+  update = async (req, res, next) => {
     let data = req.body;
     if (req.file) {
       data.image = req.file.filename;
     }
-    updateRecord("merncollection", { _id: ObjectId(req.params.id) }, data)
+    User.findByIdAndUpdate(req.params.id, {
+      $set: data,
+    })
       .then((ack) => {
         res.json({
           result: ack,
-          status: true, 
-          msg:"User updated successfully"
-        })
+          status: true,
+          msg: "User updated successfully",
+        });
       })
-      .catch((err)=>{
-        next({status: 500, msg:err});
+      .catch((err) => {
+        res.json({
+          status: 500,
+          msg: "User could not be updated",
+        });
       });
-    
   };
 
   delete = (req, res, next) => {
-    deleteRecord('merncollection',{_id: ObjectId(req.params.id)}).then((data)=>{
-      res.json({
-        result: data,
-        status: 200, 
-        msg:"User deleted successfully"
+    User.findByIdAndDelete(req.params.id)
+      .then((ack) => {
+        res.json({
+          result: ack,
+          status: 200,
+          msg: "User deleted successfully",
+        });
       })
-    }).catch((err)=>{
-      res.json({
-        result: err,
-        status: 400,
-        msg:"User could not be deleted, maybe id is wrong"
-      })
-    })
-    
+      .catch((err) => {
+        res.json({
+          result: err,
+          status: 400,
+          msg: "User could not be deleted, maybe id is wrong",
+        });
+      });
   };
 
-  show = (req, res, next) => {
-    getRecord('merncollection', {_id: ObjectId(req.params.id)}).toArray().then((result)=>{
+  show = async (req, res, next) => {
+    let user = await User.findOne({
+      email: req.body.email,
+    });
+    if (user) {
       res.json({
-        result: result,
-        status: 200, 
-        msg:"User data shown"
-      })
-    }).catch((error)=>{
+        result: user,
+        status: 200,
+        msg: "User data shown",
+      });
+    } else {
       res.json({
         result: error,
         status: 400,
-        msg:"User not found"
-      })
-    })
-    
+        msg: "User not found",
+      });
+    }
   };
 
   listAll = (req, res, next) => {
-    let abc = req.body
-    getRecord("merncollection")
-      .then((response) => {
+    User.find({})
+      .then((result) => {
         res.json({
-          result: response,
+          result: result,
           status: true,
           msg: "Fetched user data",
         });
       })
-      .catch((error) => {
+      .catch((err) => {
         res.json({
           status: 500,
-          msg:"Error in list all"
-        })
-        // next({status: 500, msg:error});
+          msg: err,
+        });
       });
   };
 }
